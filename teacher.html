@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PREVIEW · Italia Scroll · Teacher roster</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #142033; }
+    body { margin: 0; padding: 20px; background: #eef6fb; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    .sub { color: #5a6b80; font-size: 13px; margin: 0 0 16px; line-height: 1.4; }
+    .warn { background: #fff8e0; border: 1px solid #e5d2a0; padding: 10px 12px; border-radius: 12px; font-size: 13px; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(30,80,130,.1); }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e0ebf4; font-size: 13px; }
+    th { background: #dff0fa; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .empty { padding: 24px; text-align: center; color: #6b7f96; }
+    .actions { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+    button, a.btn {
+      font: inherit; border: 1.5px solid #b9d7ec; background: #fff; padding: 10px 14px;
+      border-radius: 12px; cursor: pointer; font-weight: 650; font-size: 13px; text-decoration: none; color: inherit;
+    }
+    button.danger { border-color: #e8b0a8; background: #fdecea; }
+  </style>
+</head>
+<body>
+  <h1>Italia Scroll · roster</h1>
+  <p class="sub">Scores save in <strong>this browser’s</strong> localStorage under each student’s name.
+    Open this page on the same Chromebook/device the student used (or after they finish on a shared station).</p>
+  <div class="warn">Same device only — this is not a cloud gradebook. Students type their name at start; finishes land here.</div>
+  <div class="actions">
+    <a class="btn" href="./">← Back to app</a>
+    <button type="button" id="btnRefresh">Refresh</button>
+    <button type="button" id="btnExport">Export CSV</button>
+    <button type="button" class="danger" id="btnClear">Clear roster</button>
+  </div>
+  <div id="tableWrap"></div>
+  <script>
+    const KEY = 'italiaScroll.roster.v1';
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (_) { return []; }
+    }
+    function render() {
+      const rows = load().slice().reverse();
+      const wrap = document.getElementById('tableWrap');
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="empty">No finishes yet on this device.</div>';
+        return;
+      }
+      let html = '<table><thead><tr><th>Name</th><th>Stretch</th><th>First try</th><th>When</th></tr></thead><tbody>';
+      rows.forEach((r) => {
+        const when = r.at ? new Date(r.at).toLocaleString() : '';
+        html += '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.levelTitle || r.levelId) +
+          '</td><td>' + r.firstTry + '/' + r.total + '</td><td>' + esc(when) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    }
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    document.getElementById('btnRefresh').onclick = render;
+    document.getElementById('btnClear').onclick = () => {
+      if (confirm('Clear all roster entries on this device?')) {
+        localStorage.removeItem(KEY);
+        render();
+      }
+    };
+    document.getElementById('btnExport').onclick = () => {
+      const rows = load();
+      const csv = ['name,stretch,firstTry,total,at']
+        .concat(rows.map((r) =>
+          [r.name, r.levelTitle || r.levelId, r.firstTry, r.total, r.at]
+            .map((x) => '"' + String(x ?? '').replace(/"/g, '""') + '"').join(',')
+        )).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'italia-scroll-roster.csv';
+      a.click();
+    };
+    render();
+  </script>
+</body>
+</html>
