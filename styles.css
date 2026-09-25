@@ -1249,6 +1249,16 @@ html[data-theme="dark"] .card-shade {
 }
 .yt-note[hidden] { display: none !important; }
 .has-yt .card-shade { pointer-events: none; }
+/* v14.2 phone/tablet only (<900px): show the whole bonus title still so its
+   "Ricchi e Poveri · 1981" line sits clear of the Watch on YouTube button, and keep
+   the strip under the playing video solid so the still never peeks out there. */
+@media (max-width: 899px) {
+  .has-yt .card-photo {
+    object-fit: contain;
+    background: linear-gradient(180deg, #166e94 0%, #6d7369 50%, #c3773d 100%);
+  }
+  .has-yt .yt-frame { box-shadow: 0 44px 0 0 #000; }
+}
 .finish-btn {
   margin-left: 8px;
   padding: 6px 14px;

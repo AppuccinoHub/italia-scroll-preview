@@ -37,7 +37,7 @@ Each clip was checked frame by frame against the place on its card.
 | capri-faraglioni.mp4 | c1-08 | https://www.pexels.com/video/aerial-view-of-capri-s-iconic-faraglioni-rock-formations-32693749/ | Mihaela Claudia Puscas | Pexels License |
 | capri-belvedere.mp4 | c1-09 | https://www.pexels.com/video/capri-italy-offers-stunning-views-of-the-faraglioni-rock-formations-from-a-hillside-27350976/ | Attila Pergel | Pexels License |
 | amalfi-dal-mare.mp4 | c1-07 | https://www.pexels.com/video/amalfi-dal-mare-19075925/ | Luca Musella | Pexels License |
-| tropea-isola.mp4 | c2-01 | https://commons.wikimedia.org/wiki/File:Tropea_in_Calabria_Italy.webm (4 s excerpt, cropped) | Swedrone | CC BY 3.0 |
+| tropea-isola-giorno.mp4 | c2-01 | https://commons.wikimedia.org/wiki/File:Tropea_in_Calabria_Italy.webm (v14.2: daytime 8 s excerpt 1:38.5–1:46.5, square crop, audio removed) | Swedrone | CC BY 3.0 |
 | palermo-cattedrale.mp4 | c2-08 | https://www.pexels.com/video/stunning-view-of-palermo-cathedral-in-sicily-32858326/ | Mihaela Claudia Puscas | Pexels License |
 | alberobello-trulli.mp4 | c2-13 | https://www.pexels.com/video/trulli-di-alberobello-18195603/ | frank tagliabue | Pexels License |
 | genova-porto-antico.mp4 | c3-02 | https://www.pexels.com/video/watercrafts-docked-at-the-port-of-genoa-in-italy-12068985/ | Cristian Manieri | Pexels License |
@@ -47,13 +47,13 @@ Each clip was checked frame by frame against the place on its card.
 ## Added in v14 — people/action photos (`images/people/`, cropped to 1080×1440)
 | File | Card | Source | Author | License |
 |---|---|---|---|---|
-| polignano-tuffo.jpg | c2-02 | https://www.pexels.com/photo/woman-jumping-to-water-from-rocks-17697733/ | Josh Withers | Pexels License |
+| polignano-lama-sera.jpg | c2-02 | https://commons.wikimedia.org/wiki/File:Polignano_a_Mare_-_Lama_Monachile_-_2025-09-10_16-50-10_002.jpeg (v14.2: Lama Monachile + Ponte Borbonico, 12 Jul 2024 ~20:04, swimmers small/distant; resized) | Nannamastro75 | CC BY-SA 4.0 |
 | alberobello-passeggiata.jpg | c2-05 | https://www.pexels.com/photo/woman-walking-by-trullo-houses-in-alberobello-29794349/ | AXP Photography | Pexels License |
 | matera-sassi-ragazza.jpg | c2-12 | https://www.pexels.com/photo/blonde-in-dress-and-hat-looking-at-old-town-20218680/ | y y | Pexels License |
 | braies-barca-ragazza.jpg | c3-03 | https://www.pexels.com/photo/a-woman-sitting-on-a-boat-on-the-lake-prags-in-the-prags-dolomites-in-south-tyrol-italy-26888225/ | Matei Andrei | Pexels License |
 
-To check the Polignano location (not shipped) we used the same photographer's session shot https://www.pexels.com/photo/town-buildings-over-rocks-on-sea-coast-17697735/
-and the Commons photo "40 Cala Porto (Polignano a Mare), des del mirador de Via Porto.jpg" (CC BY-SA 4.0).
+v14.2: the Polignano photo is a Commons file (CC BY-SA 4.0), not Pexels; it replaced the earlier Pexels cliff-jump photo.
+The Tropea clip is a different, daytime section of the same Commons video as before (the v14 excerpt was dawn light).
 
 ## Added in v14 — bonus card c1-16 (YouTube embed, NOT rehosted)
 - `images/bonus/sara-perche-ti-amo.jpg`: title card made for this app (gradient + text only, no third-party material).
