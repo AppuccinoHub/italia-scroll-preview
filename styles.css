@@ -1185,68 +1185,135 @@ html[data-theme="dark"] .card-shade {
   .lock-it { font-size: 15px; }
 }
 
-/* —— v14.3: bonus song card (Apple Music preview on tap; no YouTube) ——
-   The title still is always shown whole (object-fit: contain) so "Ricchi e Poveri · 1981"
-   is never covered; the play button sits between the notes and the title, and the
-   status + credit sit in the plain gradient strip under the title. */
-.has-song .card-photo {
-  object-fit: contain;
-  background: linear-gradient(180deg, #166e94 0%, #6d7369 50%, #c3773d 100%);
+/* —— v14.4: bonus song card, styled like Arianna Scroll's song break ——
+   Record + title + karaoke lyrics + big Play button live in normal flow (grid), so the
+   title and «Ricchi e Poveri · 1981» can never be covered by lyrics, buttons or bubbles. */
+.card-visual.has-song {
+  container-type: size;
+  container-name: songpane;
+  background:
+    radial-gradient(260px 200px at 20% 10%, #fff3b0, transparent 70%),
+    radial-gradient(300px 260px at 90% 90%, #cfe8f8, transparent 70%),
+    linear-gradient(170deg, #ffe3ef, #fdf1ff 55%, #e6f4ff);
+  color: #2b2140;
 }
-.has-song .card-shade { pointer-events: none; }
-.song-wrap {
+.has-song .glow, .has-song .card-emoji, .has-song .card-shade { display: none; }
+.song-inner {
   position: absolute;
   inset: 0;
   z-index: 3;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "disc head" "lyr lyr" "btn btn" "foot foot";
   align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  padding: 10px 12px;
-  pointer-events: none;
-}
-.song-wrap > * { pointer-events: auto; }
-.song-play {
-  position: absolute;
-  left: 50%;
-  top: 43%;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 22px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f5f80;
-  font: inherit;
-  font-weight: 800;
-  font-size: 17px;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-}
-.song-play:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.song-play-icon { font-size: 20px; }
-.song-playing .song-play { background: #0f5f80; color: #fff; }
-.song-status {
-  margin: 0;
-  max-width: 34em;
-  color: #fff;
-  font-size: 13px;
-  line-height: 1.3;
+  column-gap: 14px;
+  row-gap: 8px;
+  padding: 10px 14px 8px;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
-.song-credit {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 11.5px;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+.song-inner > .disc-wrap { grid-area: disc; }
+.song-inner > .song-head { grid-area: head; text-align: left; }
+.song-inner > .lyrics { grid-area: lyr; align-self: stretch; }
+.song-inner > .song-toggle { grid-area: btn; justify-self: center; }
+.song-inner > .song-foot { grid-area: foot; }
+.disc-wrap { position: relative; width: 84px; aspect-ratio: 1; }
+.record {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-radial-gradient(circle, #2b2140 0 2px, #3a2d52 2px 5px);
+  box-shadow: 0 8px 24px rgba(43, 33, 64, 0.35), inset 0 0 0 5px #ff8fb1;
+  display: grid; place-items: center;
+  animation: songSpin 3.2s linear infinite; animation-play-state: paused;
 }
-.song-credit a { color: #fff; }
+.is-playing .record { animation-play-state: running; }
+.record-label { width: 44%; height: 44%; border-radius: 50%; object-fit: cover; object-position: 50% 18%; border: 3px solid #fff3b0; }
+.record::after { content: ""; position: absolute; width: 7%; height: 7%; border-radius: 50%; background: #fff; }
+@keyframes songSpin { to { transform: rotate(360deg); } }
+.disc-wrap .eq { position: absolute; right: -12px; bottom: 2px; display: inline-flex; align-items: flex-end; gap: 3px; height: 26px; }
+.disc-wrap .eq span { width: 4px; height: 30%; border-radius: 2px; background: linear-gradient(#ff8fb1, #f4c93d); }
+.is-playing .disc-wrap .eq span { animation: songEq 0.9s ease-in-out infinite; }
+.disc-wrap .eq span:nth-child(2) { animation-delay: -0.3s; } .disc-wrap .eq span:nth-child(3) { animation-delay: -0.6s; }
+.disc-wrap .eq span:nth-child(4) { animation-delay: -0.15s; } .disc-wrap .eq span:nth-child(5) { animation-delay: -0.45s; }
+.disc-wrap .eq span:nth-child(6) { animation-delay: -0.75s; } .disc-wrap .eq span:nth-child(7) { animation-delay: -0.2s; }
+@keyframes songEq { 0%, 100% { height: 25%; } 50% { height: 100%; } }
+.song-inner .note { position: absolute; font-size: 1.1rem; color: #c73872; opacity: 0; }
+.is-playing .song-inner .note { animation: songNote 2.4s ease-in infinite; }
+.note.n1 { left: -8px; top: 30%; } .note.n2 { right: -6px; top: 6%; animation-delay: -0.8s !important; } .note.n3 { left: 18%; top: -8px; animation-delay: -1.6s !important; }
+@keyframes songNote { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px) scale(1.1); } }
+.song-title { margin: 0; font-size: 1.35rem; font-weight: 900; line-height: 1.15; color: #c73872; letter-spacing: -0.01em; }
+.song-artist { margin: 3px 0 0; font-size: 0.92rem; font-weight: 800; color: #5b4d73; }
+/* karaoke lyrics (Arianna look) */
+.song-inner .lyrics {
+  position: relative; overflow: hidden; width: 100%; min-height: 72px; border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+.ly-list { padding: 26px 10px; transition: transform 0.5s ease; }
+.ly-line { margin: 0 0 6px; font-size: 1rem; font-weight: 800; line-height: 1.35; color: rgba(43, 33, 64, 0.45); text-align: center; transition: color 0.3s, transform 0.3s; }
+.ly-line.on { color: #c73872; transform: scale(1.04); }
+.ly-line.past { color: rgba(43, 33, 64, 0.6); }
+.song-inner .w {
+  font: inherit; color: inherit; background: none; border: 0; margin: 0;
+  padding: 0 1px; border-bottom: 2px dotted rgba(199, 56, 114, 0.45); border-radius: 4px; cursor: pointer;
+}
+.song-inner .w:active, .song-inner .w:focus-visible { background: rgba(255, 214, 231, 0.9); outline: none; }
+.song-toggle {
+  min-height: 48px; min-width: 210px; padding: 10px 24px; border: 0; border-radius: 999px;
+  background: linear-gradient(135deg, #c73872, #e0507f 60%, #f07a6a); color: #fff;
+  font: inherit; font-size: 1.05rem; font-weight: 900; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(199, 56, 114, 0.35);
+}
+.song-toggle:focus-visible { outline: 3px solid #2b2140; outline-offset: 3px; }
+.song-foot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.song-status { margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #5b4d73; }
+.song-credit { margin: 0; font-size: 11.5px; font-weight: 700; color: #2a6f9e; }
+.song-credit a { color: #2a6f9e; }
+.word-bubble {
+  position: absolute; z-index: 10;
+  padding: 9px 13px; border-radius: 16px;
+  background: #fff; color: #2b2140;
+  font-size: 0.95rem; font-weight: 700; line-height: 1.35; text-align: center;
+  box-shadow: 0 10px 28px rgba(43, 33, 64, 0.28), inset 0 0 0 2px #ffd6e7;
+  animation: songBubble 0.18s ease;
+}
+.word-bubble[hidden] { display: none !important; }
+.word-bubble strong { color: #c73872; }
+.wb-from { display: block; margin-top: 3px; font-size: 0.8rem; color: #2a6f9e; }
+@keyframes songBubble { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* short phone pane (e.g. after the answer note opens): smaller record, tighter lines */
+@container songpane (max-height: 330px) {
+  .disc-wrap { width: 66px; }
+  .song-title { font-size: 1.2rem; }
+  .ly-list { padding: 20px 10px; }
+  .ly-line { font-size: 0.94rem; margin-bottom: 4px; }
+  .song-toggle { min-height: 44px; }
+  .song-inner { row-gap: 6px; padding-top: 8px; }
+}
+/* laptop / Chromebook: Arianna-style column (record on top, then title, lyrics, button) */
+@media (min-width: 900px) {
+  .song-inner {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "disc" "head" "lyr" "btn" "foot";
+    row-gap: 10px;
+    padding: 16px 22px 12px;
+  }
+  .song-inner > .disc-wrap { justify-self: center; width: min(190px, 30cqh); }
+  .song-inner > .song-head { text-align: center; }
+  .song-inner > .lyrics { max-height: 250px; }
+  .record { box-shadow: 0 10px 30px rgba(43, 33, 64, 0.35), inset 0 0 0 6px #ff8fb1; }
+  .song-title { font-size: 1.8rem; }
+  .song-artist { font-size: 1.05rem; }
+  .ly-list { padding: 34px 16px; }
+  .ly-line { font-size: 1.15rem; margin-bottom: 8px; }
+  .song-toggle { min-width: 240px; min-height: 52px; font-size: 1.15rem; }
+  .song-status { font-size: 13px; }
+  .song-inner .note { font-size: 1.4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .record, .disc-wrap .eq span, .song-inner .note { animation: none !important; }
+}
 .finish-btn {
   margin-left: 8px;
   padding: 6px 14px;

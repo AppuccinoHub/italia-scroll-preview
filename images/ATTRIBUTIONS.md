@@ -55,13 +55,14 @@ Each clip was checked frame by frame against the place on its card.
 v14.2: the Polignano photo is a Commons file (CC BY-SA 4.0), not Pexels; it replaced the earlier Pexels cliff-jump photo.
 The Tropea clip is a different, daytime section of the same Commons video as before (the v14 excerpt was dawn light).
 
-## Bonus card c1-16 — song preview (v14.3; replaces the v14 YouTube embed)
-- `images/bonus/sara-perche-ti-amo.jpg`: title card made for this app (gradient + text only, no third-party material).
-- Audio: "Sarà perché ti amo" by Ricchi e Poveri (song from 1981). **Preview courtesy of Apple Music.** The official
-  30-second iTunes preview is streamed from Apple only when the student taps Play (like Frasi Vive); the app plays
-  10.1–24.2 s of it. No audio is stored in this repo.
-  iTunes trackId 311429581, album "Ricchi E Poveri - Grandi Successi" (℗ 1997 Crisler music publishing):
-  https://music.apple.com/it/album/sara-perche-ti-amo/311429533?i=311429581
-  This is a later recording by Ricchi e Poveri, not the 1981 master. The original 1981 album track ("...E penso a te",
-  trackId 1722506116) has a preview that only covers the "E vola, vola" refrain, without the title line.
-- The v14 YouTube video (Metroman ITALY, -s1Uzjhe4EQ) is no longer used. Song rights belong to their owners.
+## Bonus card c1-16 — song preview (v14.4; replaces the v14 YouTube embed and the v14.3 1997 re-recording)
+- `images/bonus/sara-perche-ti-amo.jpg`: title card made for this app (gradient + music notes + text, no third-party material,
+  no people, no place). v14.4 shows its music-notes area as the label of the drawn (CSS) record.
+- Audio: "Sarà perché ti amo" by Ricchi e Poveri, ORIGINAL 1981 recording, album "…E penso a te" (℗ 1981 Sony Music
+  Entertainment Germany GmbH), iTunes trackId 1722506116: https://music.apple.com/it/album/sar%C3%A0-perch%C3%A9-ti-amo/1722506113?i=1722506116
+  **Preview courtesy of Apple Music.** The official 30-second iTunes preview is streamed from Apple only when the student
+  taps Play (same approach as Arianna Scroll and Frasi Vive). No audio is stored in this repo.
+- Lyric lines and timings are the ones Arianna Scroll uses (faster-whisper word timestamps, checked by ear), re-checked
+  against this preview with faster-whisper medium. Only lines that are actually sung in the preview are shown.
+- The v14 YouTube video (Metroman ITALY) and the v14.3 1997 re-recording (trackId 311429581) are no longer used.
+  Song rights belong to their owners.

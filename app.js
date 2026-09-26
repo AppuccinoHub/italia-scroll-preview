@@ -348,61 +348,130 @@
     });
   }
 
-  /* Bonus song card (v14.3): no YouTube (no video, no ads). Same mechanism as Frasi Vive:
-     the song is Apple Music's official 30-second iTunes preview, streamed only when the
-     student taps Play (the only network use on this card, nothing is stored in the repo).
-     It plays one short segment with the chorus line (card.song.lineStart–lineEnd).
-     If the preview won't load, we look the trackId up again (Apple can change preview
-     URLs); if that fails too, a short note shows and the student can still answer. */
+  /* Bonus song card (v14.4): plays «Sarà perché ti amo» the way Arianna Scroll's song
+     break does: the ORIGINAL 1981 recording as Apple Music's official 30-second iTunes
+     preview (streamed from Apple only when the student taps Play, never rehosted), a
+     spinning record, karaoke lyrics highlighted in sync (card.song.lyrics, t = seconds
+     into the preview, a list when the line repeats) and tap-a-word meanings.
+     Italia Scroll mechanics stay on top: pick the caption, no auto-advance, Finish, the
+     song stops off-card; if the preview can't load we re-look-up the trackId (Apple can
+     change preview URLs), then give up after 10 s with a note so the student can answer.
+     No YouTube anywhere. */
   const songAudio = new Audio();
   songAudio.preload = 'none';
-  const songState = { key: null, el: null, stopAt: null, url: null, urlKey: null, triedLookup: false, timer: null, attempt: 0 };
-  const SONG_PLAY_HTML = '<span class="song-play-icon" aria-hidden="true">▶</span><span>Tap to play · sound on</span>';
-  const SONG_STOP_HTML = '<span class="song-play-icon" aria-hidden="true">■</span><span>Stop</span>';
+  const songState = { el: null, card: null, st: 'idle', stopAt: null, url: null, urlKey: null, triedLookup: false, timer: null, attempt: 0 };
+  const SONG_LABELS = {
+    idle: '▶ Tap to play · sound on',
+    blocked: '▶ Tap to play · sound on',
+    loading: 'Loading…',
+    playing: '❚❚ Pause',
+    paused: '▶ Play',
+    ended: '↺ Play again',
+  };
+  let songRaf = 0;
 
   function songStatus(el, msg) {
     const s = el && el.querySelector('.song-status');
     if (s) s.textContent = msg;
   }
 
-  function setSongPlaying(el, on) {
+  function setSongState(el, st) {
     if (!el) return;
-    el.classList.toggle('song-playing', on);
-    const b = el.querySelector('.song-play');
+    if (el === songState.el) songState.st = st;
+    el.dataset.song = st;
+    el.classList.toggle('is-playing', st === 'playing');
+    const b = el.querySelector('.song-toggle');
     if (!b) return;
-    b.innerHTML = on ? SONG_STOP_HTML : SONG_PLAY_HTML;
-    b.setAttribute('aria-label', on ? 'Stop the song' : 'Play the song with sound');
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.textContent = SONG_LABELS[st] || SONG_LABELS.idle;
+    b.setAttribute('aria-pressed', st === 'playing' ? 'true' : 'false');
+    b.setAttribute('aria-label', st === 'playing' ? 'Pause the song' : 'Play the song with sound');
+  }
+
+  // Same line-picking rule as Arianna Scroll (a line starts 0.15 s early at most).
+  const lyricStart = (ln, t) => {
+    const ts = Array.isArray(ln.t) ? ln.t : [ln.t];
+    let best = -1;
+    ts.forEach((x) => {
+      if (x <= t + 0.15 && x > best) best = x;
+    });
+    return best;
+  };
+  function syncLyrics(el, t) {
+    const box = el && el.querySelector('.lyrics');
+    const card = el === songState.el ? songState.card : null;
+    if (!box || !card) return;
+    let k = -1;
+    if (t >= 0) {
+      let best = -1;
+      card.song.lyrics.forEach((ln, i) => {
+        const st = lyricStart(ln, t);
+        if (st >= 0 && st >= best) {
+          best = st;
+          k = i;
+        }
+      });
+    }
+    if (String(k) === box.dataset.on) return;
+    box.dataset.on = String(k);
+    const lines = box.querySelectorAll('.ly-line');
+    lines.forEach((l, i) => {
+      l.classList.toggle('on', i === k);
+      l.classList.toggle('past', k >= 0 && i < k);
+    });
+    const list = box.querySelector('.ly-list');
+    const cur = lines[Math.max(0, k)];
+    if (list && cur) {
+      const y = Math.max(0, cur.offsetTop - (box.clientHeight - cur.offsetHeight) / 2);
+      list.style.transform = 'translateY(' + -y + 'px)';
+    }
+  }
+  function lyricLoop() {
+    cancelAnimationFrame(songRaf);
+    if (!songState.el || songAudio.paused) return;
+    syncLyrics(songState.el, songAudio.currentTime);
+    songRaf = requestAnimationFrame(lyricLoop);
   }
 
   function stopSong() {
     songState.attempt += 1; // cancels a play that is still loading
     clearTimeout(songState.timer);
+    cancelAnimationFrame(songRaf);
+    const el = songState.el;
+    if (el) songState.st = 'idle';
     try {
       songAudio.pause();
     } catch (_) {}
-    if (songState.el) setSongPlaying(songState.el, false);
+    if (el) {
+      setSongState(el, 'idle');
+      syncLyrics(el, -1);
+      hideWordBubble(el);
+      songStatus(el, 'Tap ▶ to hear the chorus. Tap any word for its meaning.');
+    }
   }
 
   function playSong(cardEl, card) {
     const song = card.song;
     const key = String(song.trackId);
-    if (songState.el && songState.el !== cardEl) setSongPlaying(songState.el, false);
+    if (songState.el && songState.el !== cardEl) stopSong();
+    const resume = songState.el === cardEl && songState.st === 'paused';
     songState.el = cardEl;
-    songState.key = key;
-    songState.stopAt = song.lineEnd;
+    songState.card = card;
+    songState.stopAt = song.lineEnd || null;
     const want = songState.url && songState.urlKey === key ? songState.url : song.preview;
+    setSongState(cardEl, 'loading');
     songStatus(cardEl, 'Loading the song…');
-    const go = () => {
+    const go = (fromStart) => {
       const attempt = ++songState.attempt;
       clearTimeout(songState.timer);
       // A school filter can hang the request without an error: give up after 10 s.
       songState.timer = setTimeout(fail, 10000);
       const seekAndPlay = () => {
         if (attempt !== songState.attempt) return; // stopped or moved on while loading
-        try {
-          songAudio.currentTime = song.lineStart;
-        } catch (_) {}
+        if (fromStart) {
+          try {
+            songAudio.currentTime = song.lineStart || 0;
+          } catch (_) {}
+        }
         const p = songAudio.play();
         if (p && p.then) {
           p.then(() => {
@@ -411,8 +480,9 @@
               songAudio.pause();
               return;
             }
-            setSongPlaying(cardEl, true);
-            songStatus(cardEl, 'Playing the chorus… No sound? Check your volume, or just read and pick.');
+            setSongState(cardEl, 'playing');
+            songStatus(cardEl, 'No sound? Check your volume, or just read and pick.');
+            lyricLoop();
           }).catch(() => {
             if (attempt === songState.attempt) fail();
           });
@@ -427,7 +497,6 @@
     const fail = () => {
       songState.attempt += 1;
       clearTimeout(songState.timer);
-      setSongPlaying(cardEl, false);
       if (!songState.triedLookup) {
         songState.triedLookup = true;
         lookupPreview(song)
@@ -436,7 +505,7 @@
               songState.url = url;
               songState.urlKey = key;
               songAudio.src = url;
-              go();
+              go(true);
             } else offline();
           })
           .catch(offline);
@@ -444,13 +513,15 @@
     };
     const offline = () => {
       clearTimeout(songState.timer);
-      songStatus(cardEl, 'The song can’t load right now (your network may block it). No problem: read the line and pick.');
+      if (songState.el !== cardEl) return;
+      setSongState(cardEl, 'blocked');
+      songStatus(cardEl, 'The song can’t load right now (your network may block it). No problem: read the lyrics and pick.');
     };
     songAudio.onerror = () => {
-      if (songState.el === cardEl) fail();
+      if (songState.el === cardEl && songState.st === 'loading') fail();
     };
     if (songAudio.src !== want) songAudio.src = want;
-    go();
+    go(!resume);
   }
 
   function lookupPreview(song) {
@@ -475,52 +546,151 @@
   }
 
   songAudio.addEventListener('timeupdate', () => {
-    if (songState.stopAt && songAudio.currentTime >= songState.stopAt) songAudio.pause();
+    const el = songState.el;
+    if (!el) return;
+    if (songState.stopAt && songAudio.currentTime >= songState.stopAt && songState.st === 'playing') {
+      songState.st = 'ended';
+      songAudio.pause();
+      setSongState(el, 'ended');
+      syncLyrics(el, 99);
+      songStatus(el, 'That was the chorus! Play it again as many times as you like.');
+      return;
+    }
+    if (songState.st === 'playing') syncLyrics(el, songAudio.currentTime);
   });
   songAudio.addEventListener('pause', () => {
-    if (!songState.el) return;
-    setSongPlaying(songState.el, false);
-    songStatus(songState.el, 'Stopped. Play it again as many times as you like.');
+    const el = songState.el;
+    if (!el || songState.st !== 'playing') return;
+    setSongState(el, 'paused');
+    songStatus(el, 'Paused. Tap ▶ Play to keep going.');
   });
   songAudio.addEventListener('ended', () => {
-    if (songState.el) setSongPlaying(songState.el, false);
+    const el = songState.el;
+    if (!el) return;
+    cancelAnimationFrame(songRaf);
+    setSongState(el, 'ended');
+    syncLyrics(el, 99);
+    songStatus(el, 'That was the clip! Play it again as many times as you like.');
   });
+
+  /* Tap a lyric word → its meaning (+ the infinitive for verbs), like Arianna's word bubble.
+     The bubble stays inside the song panel and never goes above the lyrics box, so the
+     title and «Ricchi e Poveri · 1981» are never covered. */
+  function hideWordBubble(el) {
+    const b = el && el.querySelector('.word-bubble');
+    if (b) b.hidden = true;
+  }
+  function showWordBubble(inner, btn, entry) {
+    const b = inner.querySelector('.word-bubble');
+    if (!b) return;
+    const [word, en, from] = entry;
+    const w = word.replace(/^[…"«]+|[,.!?;:…»]+$/g, '');
+    const strong = document.createElement('strong');
+    strong.textContent = w;
+    b.replaceChildren(strong, document.createTextNode(' = ' + en));
+    if (from) {
+      const s = document.createElement('span');
+      s.className = 'wb-from';
+      s.textContent = 'from ' + from;
+      b.appendChild(s);
+    }
+    b.hidden = false;
+    const ir = inner.getBoundingClientRect();
+    const r = btn.getBoundingClientRect();
+    const lr = inner.querySelector('.lyrics').getBoundingClientRect();
+    const bw = Math.min(250, ir.width - 16);
+    b.style.width = bw + 'px';
+    let x = r.left + r.width / 2 - ir.left - bw / 2;
+    x = Math.max(8, Math.min(x, ir.width - bw - 8));
+    b.style.left = x + 'px';
+    const h = b.offsetHeight;
+    let y = r.bottom - ir.top + 6; // below the word
+    if (y + h > ir.height - 4) y = r.top - ir.top - h - 6; // no room: above it…
+    y = Math.max(y, lr.top - ir.top); // …but never above the lyrics box (title stays clear)
+    b.style.top = y + 'px';
+    clearTimeout(showWordBubble._t);
+    showWordBubble._t = setTimeout(() => (b.hidden = true), 4500);
+  }
 
   function buildSongFacade(visual, card) {
     const song = card.song;
-    const wrap = document.createElement('div');
-    wrap.className = 'song-wrap';
-    const play = document.createElement('button');
-    play.type = 'button';
-    play.className = 'song-play';
-    play.setAttribute('aria-pressed', 'false');
-    play.setAttribute('aria-label', 'Play the song with sound');
-    play.innerHTML = SONG_PLAY_HTML;
-    const status = document.createElement('p');
-    status.className = 'song-status';
+    const mk = (tag, cls, text) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    const inner = mk('div', 'song-inner');
+    const disc = mk('div', 'disc-wrap');
+    disc.setAttribute('aria-hidden', 'true');
+    const rec = mk('div', 'record');
+    const label = mk('img', 'record-label');
+    label.src = card.image; // the app's own title card (gradient + music notes, no people, no place)
+    label.alt = '';
+    label.decoding = 'async';
+    rec.appendChild(label);
+    disc.appendChild(rec);
+    const eq = mk('div', 'eq');
+    for (let k = 0; k < 7; k++) eq.appendChild(mk('span'));
+    disc.appendChild(eq);
+    disc.appendChild(mk('span', 'note n1', '♪'));
+    disc.appendChild(mk('span', 'note n2', '♫'));
+    disc.appendChild(mk('span', 'note n3', '♪'));
+    const head = mk('div', 'song-head');
+    head.appendChild(mk('h3', 'song-title', song.title));
+    head.appendChild(mk('p', 'song-artist', song.artist + ' · ' + song.year));
+    const box = mk('div', 'lyrics');
+    box.setAttribute('aria-label', 'Lyrics: tap a word to see what it means');
+    box.dataset.on = '-2';
+    const list = mk('div', 'ly-list');
+    song.lyrics.forEach((ln) => {
+      const line = mk('p', 'ly-line');
+      line.lang = 'it';
+      ln.w.forEach((entry, i) => {
+        const b = mk('button', 'w', entry[0]);
+        b.type = 'button';
+        b.setAttribute('aria-label', entry[0] + ': ' + entry[1]);
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showWordBubble(inner, b, entry);
+        });
+        line.appendChild(b);
+        if (i < ln.w.length - 1) line.appendChild(document.createTextNode(' '));
+      });
+      list.appendChild(line);
+    });
+    box.appendChild(list);
+    const btn = mk('button', 'song-toggle', SONG_LABELS.idle);
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', 'Play the song with sound');
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const cardEl = visual.closest('.feed-card');
+      if (songState.el === cardEl && songState.st === 'playing') {
+        songAudio.pause();
+        return;
+      }
+      if (songState.el === cardEl && songState.st === 'loading') return;
+      playSong(cardEl, card);
+    });
+    const foot = mk('div', 'song-foot');
+    const status = mk('p', 'song-status', 'Tap ▶ to hear the chorus. Tap any word for its meaning.');
     status.setAttribute('role', 'status');
-    status.textContent = 'Tap to hear a short part of the song.';
-    const credit = document.createElement('p');
-    credit.className = 'song-credit';
+    const credit = mk('p', 'song-credit');
     credit.innerHTML =
       'Preview courtesy of Apple Music · <a href="' +
       escapeHtml(song.view) +
       '" target="_blank" rel="noopener">Open in Apple Music</a>';
-    play.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const cardEl = visual.closest('.feed-card');
-      if (songState.el === cardEl && !songAudio.paused) {
-        stopSong();
-        return;
-      }
-      playSong(cardEl, card);
-    });
     credit.addEventListener('click', (ev) => ev.stopPropagation());
-    wrap.appendChild(play);
-    wrap.appendChild(status);
-    wrap.appendChild(credit);
+    foot.append(status, credit);
+    const bubble = mk('div', 'word-bubble');
+    bubble.setAttribute('role', 'status');
+    bubble.hidden = true;
+    inner.append(disc, head, box, btn, foot, bubble);
+    inner.addEventListener('click', () => (bubble.hidden = true));
     visual.classList.add('has-song');
-    visual.insertBefore(wrap, visual.querySelector('.card-shade'));
+    visual.appendChild(inner);
   }
 
   // Stop the bonus song when its card is not the current one (no sound off-screen).
@@ -547,8 +717,7 @@
     const imgUrl = pickImage(card, i);
     const vidUrl = card.video || '';
     if (card.song && card.song.trackId) {
-      if (imgUrl) addPhoto(visual, imgUrl, card, i);
-      buildSongFacade(visual, card);
+      buildSongFacade(visual, card); // song panel (record + title + lyrics), no full-bleed photo
     } else if (vidUrl) {
       const vid = document.createElement('video');
       vid.className = 'card-video';
