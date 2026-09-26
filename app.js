@@ -320,7 +320,7 @@
   function addPhoto(visual, imgUrl, card, i) {
     const img = document.createElement('img');
     img.className = 'card-photo';
-    img.alt = card.region || '';
+    img.alt = card.alt || card.region || '';
     img.decoding = 'async';
     img.loading = i < 3 ? 'eager' : 'lazy';
     if (i < 2) img.fetchPriority = 'high';

@@ -9,7 +9,6 @@ Each image was opened and checked visually against the place named on its card.
 ## Added in v13 — Wikimedia Commons (cropped to 1080×1440)
 | File | Commons source | Author | License |
 |---|---|---|---|
-| roma-ferrari-colosseo.jpg | COMPOSITE of "Colosseo da Via dei Fori Imperiali (27416582550).jpg" + "2022 Ferrari 296 GTB 1.jpg" (car cut out, plate blanked) | Stefano Lovato (CC BY 2.0) + Calreyn88 (CC BY-SA 4.0) | CC BY-SA 4.0 (derivative) |
 | capri-piazzetta.jpg | Piazza Umberto I din Capri7.jpg | Cezar Suceveanu | CC BY-SA 4.0 |
 | tropea-spiaggia.jpg | Santa Maria dell'Isola - Tropea - Calabria - Italy - July 17th 2013 - 01.jpg | Norbert Nagel | CC BY-SA 3.0 |
 | alberobello-via.jpg | Alberobello - Via Contessa Acquaviva.jpg | Benjamin Smith | CC BY-SA 4.0 |
@@ -29,6 +28,13 @@ capri-1/2 (Faraglioni), ischia-1/2 (Castello Aragonese), procida-1/2 (Marina Cor
 tropea-1 (Santa Maria dell'Isola), polignano-1/2 (Lama Monachile), matera-1/2 (Sassi), lecce-2 (Santa Croce), palermo-1 (Cattedrale),
 ortigia-2 (Duomo di Siracusa), bologna-2 (view with Asinelli tower), genova-1 (Porto Antico), genova-2 (Lanterna/port),
 torino-1 (Mole Antonelliana), torino-2 (Piazza San Carlo), chioggia-1/2 (Canal Vena), ravenna-1 (San Vitale), ravenna-2 (Galla Placidia).
+
+## Changed in v14.5 — Roma cards c1-05 + c3-12 (replaces the v13 Ferrari composite, which is removed)
+| File | Cards | Source | Author | License |
+|---|---|---|---|---|
+| roma-vespa-colosseo.jpg | c1-05, c3-12 | https://www.pexels.com/photo/tourists-on-scooters-at-the-colosseum-rome-36237625/ (genuine photo, not edited except crop 3000×4000 from 3072×5472, resized to 1080×1440) | Hectic Studio | Pexels License |
+
+The old `roma-ferrari-colosseo.jpg` was a composite (Colosseum photo + pasted-in Ferrari) and is no longer in the app.
 
 ## Added in v14 — short muted clips (`videos/`, re-encoded h264, ≤640 px, 5–8 s, audio removed)
 Each clip was checked frame by frame against the place on its card.

@@ -86,14 +86,15 @@ window.ITALIA_SCROLL = {
       "id": "c1-05",
       "level": 1,
       "region": "Roma",
-      "image": "images/places/roma-ferrari-colosseo.jpg",
-      "culture": "Roma · rosso corsa at the Colosseo",
-      "prompt": "I see a red Ferrari in front of the Colosseum — wild!",
+      "image": "images/places/roma-vespa-colosseo.jpg",
+      "alt": "A red Vespa scooter and a white scooter with riders in front of the Colosseum in Rome",
+      "culture": "Roma · una Vespa rossa al Colosseo",
+      "prompt": "I see a red Vespa in front of the Colosseum — wild!",
       "gloss": "right now",
       "person": "io",
       "captions": [
-        "Vedo una Ferrari rossa davanti al Colosseo, pazzesco!",
-        "Vedevo sempre una Ferrari rossa davanti al Colosseo"
+        "Vedo una Vespa rossa davanti al Colosseo, pazzesco!",
+        "Vedevo sempre una Vespa rossa davanti al Colosseo"
       ],
       "correct": 0,
       "why": [
@@ -105,8 +106,8 @@ window.ITALIA_SCROLL = {
       "softExplain": "Read the English line. Pick the Italian that says the same thing.",
       "prove": {
         "choices": [
-          "I used to see that Ferrari",
-          "I see the red Ferrari now"
+          "I used to see that Vespa",
+          "I see the red Vespa now"
         ],
         "correct": 1,
         "miss": "Live look = now."
@@ -1267,14 +1268,15 @@ window.ITALIA_SCROLL = {
       "id": "c3-12",
       "level": 3,
       "region": "Roma",
-      "image": "images/places/roma-ferrari-colosseo.jpg",
+      "image": "images/places/roma-vespa-colosseo.jpg",
+      "alt": "A red Vespa scooter and a white scooter with riders in front of the Colosseum in Rome",
       "culture": "Roma · rosso spot",
-      "prompt": "Do you see that red Ferrari in front of the Colosseum? It’s incredible!",
+      "prompt": "Do you see that red Vespa in front of the Colosseum? It’s incredible!",
       "gloss": "right now",
       "person": "tu",
       "captions": [
-        "Vedevi sempre quella Ferrari rossa davanti al Colosseo?",
-        "Vedi quella Ferrari rossa davanti al Colosseo? È incredibile!"
+        "Vedevi sempre quella Vespa rossa davanti al Colosseo?",
+        "Vedi quella Vespa rossa davanti al Colosseo? È incredibile!"
       ],
       "correct": 1,
       "why": [
@@ -1286,8 +1288,8 @@ window.ITALIA_SCROLL = {
       "softExplain": "Read the English line. Pick the Italian that says the same thing.",
       "prove": {
         "choices": [
-          "You see the Ferrari now",
-          "You used to see that Ferrari"
+          "You see the Vespa now",
+          "You used to see that Vespa"
         ],
         "correct": 0,
         "miss": "Live spot."
