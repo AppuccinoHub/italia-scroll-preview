@@ -29,12 +29,12 @@ tropea-1 (Santa Maria dell'Isola), polignano-1/2 (Lama Monachile), matera-1/2 (S
 ortigia-2 (Duomo di Siracusa), bologna-2 (view with Asinelli tower), genova-1 (Porto Antico), genova-2 (Lanterna/port),
 torino-1 (Mole Antonelliana), torino-2 (Piazza San Carlo), chioggia-1/2 (Canal Vena), ravenna-1 (San Vitale), ravenna-2 (Galla Placidia).
 
-## Changed in v14.5 — Roma cards c1-05 + c3-12 (replaces the v13 Ferrari composite, which is removed)
+## Changed in v14.5 — Roma cards c1-05 + c3-12 (replaces the earlier Roma photo, which was a composite and is removed)
 | File | Cards | Source | Author | License |
 |---|---|---|---|---|
 | roma-vespa-colosseo.jpg | c1-05, c3-12 | https://www.pexels.com/photo/tourists-on-scooters-at-the-colosseum-rome-36237625/ (genuine photo, not edited except crop 3000×4000 from 3072×5472, resized to 1080×1440) | Hectic Studio | Pexels License |
 
-The old `roma-ferrari-colosseo.jpg` was a composite (Colosseum photo + pasted-in Ferrari) and is no longer in the app.
+The earlier Roma photo was a composite (a car pasted onto a Colosseum photo); it is no longer in the app.
 
 ## Added in v14 — short muted clips (`videos/`, re-encoded h264, ≤640 px, 5–8 s, audio removed)
 Each clip was checked frame by frame against the place on its card.
