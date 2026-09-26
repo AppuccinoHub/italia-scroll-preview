@@ -55,8 +55,13 @@ Each clip was checked frame by frame against the place on its card.
 v14.2: the Polignano photo is a Commons file (CC BY-SA 4.0), not Pexels; it replaced the earlier Pexels cliff-jump photo.
 The Tropea clip is a different, daytime section of the same Commons video as before (the v14 excerpt was dawn light).
 
-## Added in v14 — bonus card c1-16 (YouTube embed, NOT rehosted)
+## Bonus card c1-16 — song preview (v14.3; replaces the v14 YouTube embed)
 - `images/bonus/sara-perche-ti-amo.jpg`: title card made for this app (gradient + text only, no third-party material).
-- Video: "NAPOLI METRO LOVE SARÀ PERCHÉ TI AMO ❤️" by the YouTube channel Metroman ITALY. It is shown only through the official
-  youtube-nocookie.com embed player after a tap: https://www.youtube.com/watch?v=-s1Uzjhe4EQ
-  No audio or video from it is stored in this repo. Song: "Sarà perché ti amo" (Ricchi e Poveri, 1981). Rights belong to their owners.
+- Audio: "Sarà perché ti amo" by Ricchi e Poveri (song from 1981). **Preview courtesy of Apple Music.** The official
+  30-second iTunes preview is streamed from Apple only when the student taps Play (like Frasi Vive); the app plays
+  10.1–24.2 s of it. No audio is stored in this repo.
+  iTunes trackId 311429581, album "Ricchi E Poveri - Grandi Successi" (℗ 1997 Crisler music publishing):
+  https://music.apple.com/it/album/sara-perche-ti-amo/311429533?i=311429581
+  This is a later recording by Ricchi e Poveri, not the 1981 master. The original 1981 album track ("...E penso a te",
+  trackId 1722506116) has a preview that only covers the "E vola, vola" refrain, without the title line.
+- The v14 YouTube video (Metroman ITALY, -s1Uzjhe4EQ) is no longer used. Song rights belong to their owners.

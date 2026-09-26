@@ -4,7 +4,8 @@
    Person scope: io, tu, lui/lei, noi (spread evenly per level). Silent unlock every 15 clears.
    Every card has ONE explicit, visually verified photo of the place named on the card.
    No rotation arrays. v14: 9 place-verified muted clips (card.video, photo = poster/fallback),
-   4 place-verified people photos, 1 bonus YouTube sing-along card (tap to play, never autoplay).
+   4 place-verified people photos, 1 bonus sing-along card (v14.3: Apple Music 30 s preview streamed only on tap,
+   plays the chorus segment; no YouTube, never autoplays).
    Correct-answer slot varies per card.
 */
 window.ITALIA_SCROLL = {
@@ -579,13 +580,18 @@ window.ITALIA_SCROLL = {
       "level": 1,
       "region": "Bonus 🎶",
       "image": "images/bonus/sara-perche-ti-amo.jpg",
-      "youtube": {
-        "id": "-s1Uzjhe4EQ",
-        "title": "NAPOLI METRO LOVE SARÀ PERCHÉ TI AMO ❤️",
-        "channel": "Metroman ITALY",
-        "url": "https://www.youtube.com/watch?v=-s1Uzjhe4EQ"
+      "song": {
+        "trackId": 311429581,
+        "title": "Sarà perché ti amo",
+        "artist": "Ricchi e Poveri",
+        "year": 1981,
+        "recording": "Ricchi e Poveri’s own later recording (Apple Music album “Ricchi E Poveri - Grandi Successi”, ℗ 1997); the 1981 master’s preview has no title line",
+        "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/6c/04/47/6c04478e-e910-ed78-66c4-bac183383546/mzaf_336326340722790076.plus.aac.p.m4a",
+        "view": "https://music.apple.com/it/album/sara-perche-ti-amo/311429533?i=311429581",
+        "lineStart": 10.1,
+        "lineEnd": 24.2
       },
-      "culture": "Bonus · a metro-car sing-along of a 1981 classic",
+      "culture": "Bonus · a 1981 Sanremo classic to sing along to",
       "prompt": "We’re all singing ‘Sarà perché ti amo’ together right now!",
       "gloss": "right now",
       "person": "noi",
@@ -598,7 +604,7 @@ window.ITALIA_SCROLL = {
         "",
         "That one is how it used to go. English is right now."
       ],
-      "help": "Tap ▶ to hear the crowd sing (sound on), then pick. cantiamo = we sing / we’re singing. insieme = together.",
+      "help": "Tap ▶ to hear the chorus (sound on), then pick. No sound? Just read and pick. cantiamo = we sing / we’re singing. insieme = together.",
       "explain": "Cantiamo tutti insieme… = we’re singing together right now — live.",
       "softExplain": "Read the English line. Pick the Italian that says the same thing.",
       "prove": {

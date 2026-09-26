@@ -348,129 +348,186 @@
     });
   }
 
-  /* Bonus YouTube card: tap-to-play only (never autoplay, sound is opt-in).
-     Uses the privacy-enhanced youtube-nocookie.com embed. If the school network
-     blocks YouTube, the local still stays visible and a "Watch on YouTube" link is
-     always shown, so the card never breaks. */
-  function buildYouTubeFacade(visual, card) {
-    const yt = card.youtube;
+  /* Bonus song card (v14.3): no YouTube (no video, no ads). Same mechanism as Frasi Vive:
+     the song is Apple Music's official 30-second iTunes preview, streamed only when the
+     student taps Play (the only network use on this card, nothing is stored in the repo).
+     It plays one short segment with the chorus line (card.song.lineStart–lineEnd).
+     If the preview won't load, we look the trackId up again (Apple can change preview
+     URLs); if that fails too, a short note shows and the student can still answer. */
+  const songAudio = new Audio();
+  songAudio.preload = 'none';
+  const songState = { key: null, el: null, stopAt: null, url: null, urlKey: null, triedLookup: false, timer: null, attempt: 0 };
+  const SONG_PLAY_HTML = '<span class="song-play-icon" aria-hidden="true">▶</span><span>Tap to play · sound on</span>';
+  const SONG_STOP_HTML = '<span class="song-play-icon" aria-hidden="true">■</span><span>Stop</span>';
+
+  function songStatus(el, msg) {
+    const s = el && el.querySelector('.song-status');
+    if (s) s.textContent = msg;
+  }
+
+  function setSongPlaying(el, on) {
+    if (!el) return;
+    el.classList.toggle('song-playing', on);
+    const b = el.querySelector('.song-play');
+    if (!b) return;
+    b.innerHTML = on ? SONG_STOP_HTML : SONG_PLAY_HTML;
+    b.setAttribute('aria-label', on ? 'Stop the song' : 'Play the song with sound');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function stopSong() {
+    songState.attempt += 1; // cancels a play that is still loading
+    clearTimeout(songState.timer);
+    try {
+      songAudio.pause();
+    } catch (_) {}
+    if (songState.el) setSongPlaying(songState.el, false);
+  }
+
+  function playSong(cardEl, card) {
+    const song = card.song;
+    const key = String(song.trackId);
+    if (songState.el && songState.el !== cardEl) setSongPlaying(songState.el, false);
+    songState.el = cardEl;
+    songState.key = key;
+    songState.stopAt = song.lineEnd;
+    const want = songState.url && songState.urlKey === key ? songState.url : song.preview;
+    songStatus(cardEl, 'Loading the song…');
+    const go = () => {
+      const attempt = ++songState.attempt;
+      clearTimeout(songState.timer);
+      // A school filter can hang the request without an error: give up after 10 s.
+      songState.timer = setTimeout(fail, 10000);
+      const seekAndPlay = () => {
+        if (attempt !== songState.attempt) return; // stopped or moved on while loading
+        try {
+          songAudio.currentTime = song.lineStart;
+        } catch (_) {}
+        const p = songAudio.play();
+        if (p && p.then) {
+          p.then(() => {
+            clearTimeout(songState.timer);
+            if (attempt !== songState.attempt || songState.el !== cardEl) {
+              songAudio.pause();
+              return;
+            }
+            setSongPlaying(cardEl, true);
+            songStatus(cardEl, 'Playing the chorus… No sound? Check your volume, or just read and pick.');
+          }).catch(() => {
+            if (attempt === songState.attempt) fail();
+          });
+        }
+      };
+      if (songAudio.readyState >= 1) seekAndPlay();
+      else {
+        songAudio.addEventListener('loadedmetadata', seekAndPlay, { once: true });
+        songAudio.load();
+      }
+    };
+    const fail = () => {
+      songState.attempt += 1;
+      clearTimeout(songState.timer);
+      setSongPlaying(cardEl, false);
+      if (!songState.triedLookup) {
+        songState.triedLookup = true;
+        lookupPreview(song)
+          .then((url) => {
+            if (url && url !== songAudio.src) {
+              songState.url = url;
+              songState.urlKey = key;
+              songAudio.src = url;
+              go();
+            } else offline();
+          })
+          .catch(offline);
+      } else offline();
+    };
+    const offline = () => {
+      clearTimeout(songState.timer);
+      songStatus(cardEl, 'The song can’t load right now (your network may block it). No problem: read the line and pick.');
+    };
+    songAudio.onerror = () => {
+      if (songState.el === cardEl) fail();
+    };
+    if (songAudio.src !== want) songAudio.src = want;
+    go();
+  }
+
+  function lookupPreview(song) {
+    return new Promise((res, rej) => {
+      const ctl = 'AbortController' in window ? new AbortController() : null;
+      const t = setTimeout(() => {
+        if (ctl) ctl.abort();
+        rej(new Error('timeout'));
+      }, 6000);
+      fetch('https://itunes.apple.com/lookup?id=' + encodeURIComponent(song.trackId) + '&country=it', ctl ? { signal: ctl.signal } : {})
+        .then((r) => r.json())
+        .then((j) => {
+          clearTimeout(t);
+          const r0 = j && j.results && j.results[0];
+          res(r0 && r0.previewUrl);
+        })
+        .catch((e) => {
+          clearTimeout(t);
+          rej(e);
+        });
+    });
+  }
+
+  songAudio.addEventListener('timeupdate', () => {
+    if (songState.stopAt && songAudio.currentTime >= songState.stopAt) songAudio.pause();
+  });
+  songAudio.addEventListener('pause', () => {
+    if (!songState.el) return;
+    setSongPlaying(songState.el, false);
+    songStatus(songState.el, 'Stopped. Play it again as many times as you like.');
+  });
+  songAudio.addEventListener('ended', () => {
+    if (songState.el) setSongPlaying(songState.el, false);
+  });
+
+  function buildSongFacade(visual, card) {
+    const song = card.song;
     const wrap = document.createElement('div');
-    wrap.className = 'yt-wrap';
+    wrap.className = 'song-wrap';
     const play = document.createElement('button');
     play.type = 'button';
-    play.className = 'yt-play';
-    play.setAttribute('aria-label', 'Play the video with sound');
-    play.innerHTML = '<span class="yt-play-icon" aria-hidden="true">▶</span><span>Tap to play · sound on</span>';
-    const link = document.createElement('a');
-    link.className = 'yt-link';
-    link.href = yt.url || 'https://www.youtube.com/watch?v=' + encodeURIComponent(yt.id);
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = 'Watch on YouTube ↗';
-    const note = document.createElement('p');
-    note.className = 'yt-note';
-    note.hidden = true;
-    note.textContent = 'The video didn’t load (YouTube may be blocked here). Use “Watch on YouTube”.';
+    play.className = 'song-play';
+    play.setAttribute('aria-pressed', 'false');
+    play.setAttribute('aria-label', 'Play the song with sound');
+    play.innerHTML = SONG_PLAY_HTML;
+    const status = document.createElement('p');
+    status.className = 'song-status';
+    status.setAttribute('role', 'status');
+    status.textContent = 'Tap to hear a short part of the song.';
+    const credit = document.createElement('p');
+    credit.className = 'song-credit';
+    credit.innerHTML =
+      'Preview courtesy of Apple Music · <a href="' +
+      escapeHtml(song.view) +
+      '" target="_blank" rel="noopener">Open in Apple Music</a>';
     play.addEventListener('click', (ev) => {
       ev.stopPropagation();
-      if (wrap.querySelector('iframe') || wrap.dataset.probing) return;
-      // Probe first: if the network blocks YouTube, keep the local still + link.
-      wrap.dataset.probing = '1';
-      play.disabled = true;
-      probeYouTube(yt.id, (ok) => {
-        delete wrap.dataset.probing;
-        play.disabled = false;
-        if (!ok) {
-          note.hidden = false;
-          return;
-        }
-        insertFrame();
-      });
+      const cardEl = visual.closest('.feed-card');
+      if (songState.el === cardEl && !songAudio.paused) {
+        stopSong();
+        return;
+      }
+      playSong(cardEl, card);
     });
-    function insertFrame() {
-      const f = document.createElement('iframe');
-      f.className = 'yt-frame';
-      f.title = yt.title || 'YouTube video';
-      f.src =
-        'https://www.youtube-nocookie.com/embed/' +
-        encodeURIComponent(yt.id) +
-        '?autoplay=1&rel=0&playsinline=1&modestbranding=1&loop=1&playlist=' +
-        encodeURIComponent(yt.id); // loop = no end-screen suggestions
-      f.allow = 'autoplay; encrypted-media; picture-in-picture';
-      f.referrerPolicy = 'strict-origin-when-cross-origin';
-      f.setAttribute('allowfullscreen', '');
-      let loaded = false;
-      const timer = setTimeout(() => {
-        if (loaded) return;
-        f.remove();
-        play.hidden = false;
-        note.hidden = false;
-      }, 9000);
-      f.addEventListener('load', () => {
-        loaded = true;
-        clearTimeout(timer);
-      });
-      f.addEventListener('error', () => {
-        clearTimeout(timer);
-        f.remove();
-        play.hidden = false;
-        note.hidden = false;
-      });
-      play.hidden = true;
-      note.hidden = true;
-      wrap.insertBefore(f, wrap.firstChild);
-    }
+    credit.addEventListener('click', (ev) => ev.stopPropagation());
     wrap.appendChild(play);
-    wrap.appendChild(note);
-    wrap.appendChild(link);
-    visual.classList.add('has-yt');
+    wrap.appendChild(status);
+    wrap.appendChild(credit);
+    visual.classList.add('has-song');
     visual.insertBefore(wrap, visual.querySelector('.card-shade'));
   }
 
-  // Both the embed host and the video's thumbnail must load (a school filter's
-  // block page is not an image, so it fails). 5 s budget.
-  function probeYouTube(id, cb) {
-    const urls = [
-      'https://www.youtube-nocookie.com/favicon.ico',
-      'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/default.jpg',
-    ];
-    let left = urls.length;
-    let done = false;
-    const finish = (ok) => {
-      if (done) return;
-      done = true;
-      cb(ok);
-    };
-    const timer = setTimeout(() => finish(false), 5000);
-    urls.forEach((u) => {
-      const im = new Image();
-      im.onload = () => {
-        left -= 1;
-        if (left === 0) {
-          clearTimeout(timer);
-          finish(true);
-        }
-      };
-      im.onerror = () => {
-        clearTimeout(timer);
-        finish(false);
-      };
-      im.src = u + (u.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();
-    });
-  }
-
-  // Stop any bonus YouTube player that is not on the current card (no sound off-screen).
+  // Stop the bonus song when its card is not the current one (no sound off-screen).
   function resetOffscreenEmbeds(activeIdx) {
-    const feed = $('feed');
-    if (!feed) return;
-    feed.querySelectorAll('.feed-card').forEach((cardEl) => {
-      if (Number(cardEl.dataset.index) === activeIdx) return;
-      const f = cardEl.querySelector('iframe.yt-frame');
-      if (!f) return;
-      f.remove();
-      const play = cardEl.querySelector('.yt-play');
-      if (play) play.hidden = false;
-    });
+    if (!songState.el) return;
+    if (Number(songState.el.dataset.index) === activeIdx && document.contains(songState.el)) return;
+    stopSong();
   }
 
   function buildCardEl(card, i) {
@@ -489,9 +546,9 @@
 
     const imgUrl = pickImage(card, i);
     const vidUrl = card.video || '';
-    if (card.youtube && card.youtube.id) {
+    if (card.song && card.song.trackId) {
       if (imgUrl) addPhoto(visual, imgUrl, card, i);
-      buildYouTubeFacade(visual, card);
+      buildSongFacade(visual, card);
     } else if (vidUrl) {
       const vid = document.createElement('video');
       vid.className = 'card-video';
@@ -729,7 +786,7 @@
     updateNavLock();
 
     const allDone = state.cards.every((c) => state.answeredOk[c.id]);
-    if (card.youtube) {
+    if (card.song) {
       // Let the song keep playing: no auto-advance. Student moves on when ready.
       cancelAutoAdvance();
       if (allDone) showFinishButton(art);
