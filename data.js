@@ -1270,7 +1270,7 @@ window.ITALIA_SCROLL = {
       "region": "Roma",
       "image": "images/places/roma-vespa-colosseo.jpg",
       "alt": "A red Vespa scooter and a white scooter with riders in front of the Colosseum in Rome",
-      "culture": "Roma · rosso spot",
+      "culture": "Roma · una Vespa rossa",
       "prompt": "Do you see that red Vespa in front of the Colosseum? It’s incredible!",
       "gloss": "right now",
       "person": "tu",
