@@ -380,6 +380,10 @@
     if (el === songState.el) songState.st = st;
     el.dataset.song = st;
     el.classList.toggle('is-playing', st === 'playing');
+    if (st === 'loading' || st === 'playing') {
+      const box = el.querySelector('.lyrics');
+      if (box) box.scrollTop = 0; // karaoke centring takes over from any manual scroll
+    }
     const b = el.querySelector('.song-toggle');
     if (!b) return;
     b.textContent = SONG_LABELS[st] || SONG_LABELS.idle;

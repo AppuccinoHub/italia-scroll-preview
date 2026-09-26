@@ -1249,6 +1249,8 @@ html[data-theme="dark"] .card-shade {
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
           mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
 }
+/* when the karaoke isn't driving the list (not started, blocked network, ended) students can scroll to read every line */
+.feed-card:not([data-song="playing"]):not([data-song="paused"]):not([data-song="loading"]) .song-inner .lyrics { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .ly-list { padding: 26px 10px; transition: transform 0.5s ease; }
 .ly-line { margin: 0 0 6px; font-size: 1rem; font-weight: 800; line-height: 1.35; color: rgba(43, 33, 64, 0.45); text-align: center; transition: color 0.3s, transform 0.3s; }
 .ly-line.on { color: #c73872; transform: scale(1.04); }
